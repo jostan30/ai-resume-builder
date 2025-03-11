@@ -18,7 +18,7 @@ const SignupForm: React.FC = () => {
     const { error  } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: "https://ai-resume-builder-7kojvm4ru-jostan30s-projects.vercel.app/signup" }, // Redirects after verification
+      options: { emailRedirectTo: "https://ai-resume-builder-bay.vercel.app/signup" }, // Redirects after verification
     });
 
     if (error) {
