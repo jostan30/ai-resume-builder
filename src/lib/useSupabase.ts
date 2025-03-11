@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supaBaseClient";
-import { Session, User } from "@supabase/supabase-js";
+import { User, Session } from "@supabase/supabase-js";
 
-
-export const useAuth = () => {
+export const useSupabase = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -13,7 +12,6 @@ export const useAuth = () => {
     const fetchUser = async () => {
       setIsLoading(true);
       const { data, error } = await supabase.auth.getUser();
-      console.log("User data:", data);
 
       if (error) {
         console.error("Error fetching user:", error.message);
@@ -37,5 +35,5 @@ export const useAuth = () => {
     };
   }, []);
 
-  return { user, isLoading };
+  return { supabase, user, isLoading };
 };
