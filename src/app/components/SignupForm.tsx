@@ -14,13 +14,11 @@ const SignupForm: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    const { error  } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: "https://ai-resume-builder-bay.vercel.app/signup" }, // Redirects after verification
     });
-
+    
     if (error) {
       toast("Error signing up..", {
         description: `Error: ${error.message}`,
