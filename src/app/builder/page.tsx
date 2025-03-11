@@ -150,7 +150,7 @@ export default function ResumeBuilder() {
     }
     
     fetchResumeData();
-  }, []);
+  }, [[user, supabase, form]]);
 
   // Auto-save to Supabase
   useEffect(() => {
@@ -182,7 +182,7 @@ export default function ResumeBuilder() {
     }, 1500);
     
     return () => clearTimeout(debounce);
-  }, []);
+  }, [user, supabase, watchedValues]);
 
   // Generate AI feedback
   useEffect(() => {
@@ -218,7 +218,7 @@ export default function ResumeBuilder() {
     
     const debounce = setTimeout(generateAiFeedback, 2000);
     return () => clearTimeout(debounce);
-  }, []);
+  }, [watchedValues]);
 
   // Generate AI content for a specific section
   const generateAiContent = async (section: string, context: any) => {
