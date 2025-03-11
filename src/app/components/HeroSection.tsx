@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, TargetAndTransition } from "framer-motion";
+import { motion} from "framer-motion";
 import { ArrowRight, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
