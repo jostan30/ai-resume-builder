@@ -150,7 +150,7 @@ export default function ResumeBuilder() {
     }
     
     fetchResumeData();
-  }, [[user, supabase, form]]);
+  }, [user, supabase, form]);
 
   // Auto-save to Supabase
   useEffect(() => {
