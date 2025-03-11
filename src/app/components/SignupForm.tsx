@@ -1,7 +1,8 @@
 'use client'
 import { useState } from "react";
-import { supabase } from "../../../lib/supaBaseClient";
+import { supabase } from "@/lib/supaBaseClient";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const SignupForm: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -17,6 +18,7 @@ const SignupForm: React.FC = () => {
     const { error  } = await supabase.auth.signUp({
       email,
       password,
+      options: { emailRedirectTo: "http://localhost:3000/signup" }, // Redirects after verification
     });
 
     if (error) {
@@ -35,7 +37,6 @@ const SignupForm: React.FC = () => {
       })
       setEmail("");
       setPassword("");
-      
     }
     setLoading(false);
   };
@@ -58,13 +59,7 @@ const SignupForm: React.FC = () => {
         required
         className="border p-2 rounded"
       />
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-blue-500 text-white p-2 rounded"
-      >
-        {loading ? "Signing Up..." : "Sign Up"}
-      </button>
+        <Button type="submit" disabled={loading}>  {loading ? "Signing Up..." : "Sign Up"}</Button>
       {error && <p className="text-red-500">{error}</p>}
     </form>
   );
