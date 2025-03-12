@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Wand2, AlertCircle, Trash, Plus, ArrowRight } from "lucide-react";
-import { useSupabase }  from "@/lib/useSupabase";
+import { useSupabase } from "@/lib/useSupabase";
 import { motion, AnimatePresence } from "framer-motion";
 
 
@@ -129,38 +128,38 @@ export default function ResumeBuilder() {
   useEffect(() => {
     async function fetchResumeData() {
       if (!user) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('resumes')
           .select('*')
           .eq('user_id', user.id)
           .single();
-        
+
         if (error) {
           console.error("Error fetching resume:", error);
           return;
         }
-        
-        if (data) {
+
+        if (data?.content) {
           form.reset(data.content);
           toast("Resume loaded..", {
-            description:` Your saved resume has been loaded.`,
-          }) 
+            description: ` Your saved resume has been loaded.`,
+          })
         }
       } catch (error) {
         console.error("Error fetching resume:", error);
       }
     }
-    
+
     fetchResumeData();
   }, [user, supabase, form]);
 
   // Auto-save to Supabase
   useEffect(() => {
+
+    if (!user) return;
     const debounce = setTimeout(async () => {
-      if (!user) return;
-      
       try {
         setIsSaving(true);
         const { error } = await supabase
@@ -170,13 +169,9 @@ export default function ResumeBuilder() {
             content: watchedValues,
             updated_at: new Date().toISOString(),
           }, { onConflict: 'user_id' });
-        
+
         if (error) {
-          console.error("Error saving resume:", error);
-          toast.error("Error saving..", {
-            description:` There was an error saving your resume.`,
-          }) 
-          
+          console.error("Error saving resume:", error)
         }
       } catch (error) {
         console.error("Error saving resume:", error);
@@ -184,31 +179,31 @@ export default function ResumeBuilder() {
         setIsSaving(false);
       }
     }, 1500);
-    
+
     return () => clearTimeout(debounce);
   }, [user, supabase, watchedValues]);
 
-  // Generate AI feedback
+  // // Generate AI feedback
   useEffect(() => {
     const generateAiFeedback = () => {
       // Simulate AI feedback (would be replaced with actual AI API calls)
       const feedback = [];
-      
+
       // Check personal info completeness
       if (!watchedValues.personalInfo.linkedin) {
         feedback.push("Adding a LinkedIn profile can strengthen your professional presence.");
       }
-      
+
       // Check summary length
       if (watchedValues.summary && watchedValues.summary.length < 200) {
         feedback.push("Your summary is quite brief. Consider expanding it to highlight your key strengths.");
       }
-      
+
       // Check skills count
       if (watchedValues.skills.length < 5) {
         feedback.push("Adding more skills relevant to your target job can improve your resume.");
       }
-      
+
       // Check work experience descriptions
       const hasEmptyJobDescriptions = watchedValues.workExperience.some(
         job => job.title && job.company && (!job.description || job.description.length < 50)
@@ -216,201 +211,73 @@ export default function ResumeBuilder() {
       if (hasEmptyJobDescriptions) {
         feedback.push("Add detailed job descriptions with accomplishments and metrics for better impact.");
       }
-      
+
       setAiFeedback(feedback);
     };
-    
+
     const debounce = setTimeout(generateAiFeedback, 2000);
     return () => clearTimeout(debounce);
   }, [watchedValues]);
 
-  // Generate AI content for a specific section
-  const generateAiContent = async (section: string, context: any) => {
-    setIsGenerating(true);
-    
-    try {
-      // Simulate AI generation delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // This would be replaced with actual AI API calls
-      switch (section) {
-        case "summary":
-          const jobTitle = context?.jobTitle || watchedValues.workExperience[0]?.title || "";
-          if (jobTitle) {
-            form.setValue("summary", `Experienced ${jobTitle} with a proven track record of delivering high-quality results. Skilled in collaboration, problem-solving, and adapting to new technologies. Passionate about creating innovative solutions that drive business growth while maintaining excellence in technical implementation.`);
-            toast("Summary generated..", {
-                description:` AI has generated a summary based on your job title`,
-              })   
-          } else {
-            toast.error("Information needed",{
-              description: "Please add a job title to generate a relevant summary.",
-            });
-          }
-          break;
-          
-        case "skills":
-          const role = context?.role || watchedValues.workExperience[0]?.title || "";
-          if (role) {
-            if (role.toLowerCase().includes("developer") || role.toLowerCase().includes("engineer")) {
-              form.setValue("skills", ["JavaScript", "TypeScript", "React", "Node.js", "CSS", "HTML", "Git", "REST APIs", "Problem Solving", "Team Collaboration"]);
-            } else if (role.toLowerCase().includes("designer")) {
-              form.setValue("skills", ["UI/UX Design", "Figma", "Adobe Creative Suite", "Prototyping", "Wireframing", "User Research", "Design Systems", "Typography", "Color Theory", "Responsive Design"]);
-            } else if (role.toLowerCase().includes("manager")) {
-              form.setValue("skills", ["Team Leadership", "Project Management", "Strategic Planning", "Stakeholder Management", "Budgeting", "Agile Methodologies", "Performance Evaluation", "Conflict Resolution", "Communication", "Decision Making"]);
-            } else {
-              form.setValue("skills", ["Communication", "Problem Solving", "Team Collaboration", "Time Management", "Project Management", "Adaptability", "Analytical Thinking", "Attention to Detail"]);
-            }
-            toast("Skills generated..", {
-                description:` AI has suggested skills based on ${role} role.`,
-              })
-          } else {
-            toast.error("Information needed",{
-                description: "Please add a job title to generate relevant skills.",
-                })
-          
-          }
-          break;
-          
-        case "workExperience":
-          const index = context?.index || 0;
-          const job = form.getValues().workExperience[index];
-          
-          if (job?.title && job?.company) {
-            let newDescription = "";
-            if (job.title.toLowerCase().includes("developer") || job.title.toLowerCase().includes("engineer")) {
-              newDescription = `• Developed and maintained web applications using modern JavaScript frameworks, resulting in a 30% increase in user engagement.\n• Collaborated with cross-functional teams to implement new features and resolve complex technical issues.\n• Optimized application performance, reducing page load times by 40%.\n• Participated in code reviews and mentored junior developers.`;
-            } else if (job.title.toLowerCase().includes("designer")) {
-              newDescription = `• Created user-centered designs for web and mobile applications that increased user satisfaction by 25%.\n• Conducted user research and usability testing to inform design decisions.\n• Developed responsive design systems that ensured consistency across multiple platforms.\n• Collaborated with developers to ensure high-quality implementation of designs.`;
-            } else if (job.title.toLowerCase().includes("manager")) {
-              newDescription = `• Led a team of 8 professionals, providing mentorship and guidance to achieve departmental goals.\n• Managed project timelines and resources, delivering 95% of projects on time and within budget.\n• Developed strategic plans that aligned with company objectives and increased revenue by 20%.\n• Fostered a collaborative team environment that improved employee retention by 15%.`;
-            } else {
-              newDescription = `• Executed key responsibilities that contributed to team and organizational success.\n• Collaborated with cross-functional teams to achieve shared objectives.\n• Implemented process improvements that increased efficiency by 15%.\n• Received recognition for outstanding performance and contributions.`;
-            }
-            
-            form.setValue(`workExperience.${index}.description`, newDescription);
-            toast("Description generated...", {
-                description:` AI has generated a description for ${job.title} at ${job.company}.`,
-              })
-           
-          } else {
-            toast.error("Information needed",{ 
-                description: "Please add a job title and company to generate a description.",
-              })
-            
-          }
-          break;
-          
-        default:
-          toast("Feature not available",{
-            description: "AI generation for this section is not available yet.",
-          });
-      }
-    } catch (error) {
-      console.error("Error generating AI content:", error);
-      toast.error( "Generation failed",{   
-        description: "There was an error generating AI content.",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+// Generate AI content for a specific section
+const generateAiContent = async (section: string) => {
+  setIsGenerating(true);
 
-  // Auto-fill entire resume with AI
-  const autoFillResume = async () => {
-    setIsGenerating(true);
+  try {
+    const jobTitle = form.getValues().workExperience[0]?.title;
+    const payload = JSON.stringify({ section, jobTitle });
+    console.log("Request Payload:", payload);
+
+    // Update the URL to match your deployed backend
+    const API_URL = "http://localhost:8000";
     
-    try {
-      // Simulate AI generation delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // This would be replaced with actual Hugging Face API calls
-      form.reset({
-        personalInfo: {
-          name: "Alex Johnson",
-          email: "alex.johnson@example.com",
-          phone: "(555) 123-4567",
-          location: "San Francisco, CA",
-          linkedin: "linkedin.com/in/alexjohnson",
-          website: "alexjohnson.dev",
-        },
-        summary: "Innovative Full Stack Developer with 5+ years of experience building scalable web applications and services. Passionate about creating intuitive user experiences and optimizing application performance. Skilled in React, Node.js, and cloud architecture with a strong focus on code quality and best practices.",
-        skills: [
-          "JavaScript", "TypeScript", "React", "Node.js", 
-          "Express", "MongoDB", "PostgreSQL", "AWS", 
-          "Docker", "CI/CD", "REST APIs", "GraphQL"
-        ],
-        workExperience: [
-          {
-            title: "Senior Full Stack Developer",
-            company: "TechInnovate Solutions",
-            location: "San Francisco, CA",
-            startDate: "2022-01",
-            endDate: "",
-            current: true,
-            description: "• Led development of a microservices architecture that improved scalability by 200%.\n• Architected and implemented a React-based frontend that reduced load times by 40%.\n• Mentored junior developers and established code review processes that reduced bugs by 30%.\n• Collaborated with product and design teams to deliver features that increased user engagement by 25%.",
-          },
-          {
-            title: "Full Stack Developer",
-            company: "WebSphere Inc.",
-            location: "Oakland, CA",
-            startDate: "2019-03",
-            endDate: "2021-12",
-            current: false,
-            description: "• Developed and maintained RESTful APIs that powered mobile and web applications.\n• Implemented authentication and authorization systems that enhanced security.\n• Created responsive web interfaces using React and modern CSS techniques.\n• Optimized database queries that improved application performance by 35%.",
-          },
-        ],
-        education: [
-          {
-            degree: "BSc in Computer Science",
-            institution: "University of California, Berkeley",
-            location: "Berkeley, CA",
-            startDate: "2015-09",
-            endDate: "2019-05",
-            description: "Graduated with honors. Specialized in software engineering and artificial intelligence.",
-          },
-        ],
-        projects: [
-          {
-            name: "E-commerce Platform",
-            description: "Built a full-stack e-commerce platform using React, Node.js, and MongoDB. Implemented features including user authentication, product catalog, shopping cart, and payment processing.",
-            link: "github.com/alexj/ecommerce-platform",
-            technologies: ["React", "Node.js", "MongoDB", "Stripe API"],
-          },
-          {
-            name: "Task Management App",
-            description: "Developed a collaborative task management application with real-time updates using Socket.io, React, and Express. Features include drag-and-drop interfaces, task assignments, and progress tracking.",
-            link: "taskapp.alexjohnson.dev",
-            technologies: ["React", "Express", "Socket.io", "PostgreSQL"],
-          },
-        ],
-        certifications: [
-          {
-            name: "AWS Certified Solutions Architect",
-            issuer: "Amazon Web Services",
-            date: "2022-05",
-            description: "Validated expertise in designing and deploying scalable systems on AWS.",
-          },
-          {
-            name: "Professional Scrum Master I",
-            issuer: "Scrum.org",
-            date: "2021-02",
-            description: "Certified in Scrum methodologies and agile project management.",
-          },
-        ],
-      });
-      
-      toast("Resume auto-filled",{
-        description: "AI has generated a complete resume draft. You can edit and customize it as needed.",
-      });
-    } catch (error) {
-      console.error("Error auto-filling resume:", error);
-      toast.error("Auto-fill failed",{
-        description: "There was an error generating your resume.",
-      });
-    } finally {
-      setIsGenerating(false);
+    const response = await fetch(`${API_URL}/api/generate-ai-content`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.statusText}`);
     }
-  };
+
+    const data = await response.json();
+    console.log("Received Data:", data);
+
+    if (data.error) {
+      toast.error("Generation failed", { description: data.error });
+      return;
+    }
+
+    // Update form fields based on response
+    if (section === "summary" && data.summary) {
+      form.setValue("summary", data.summary);
+      toast.success("Summary generated", {
+        description: `AI-generated summary for ${jobTitle || "your profile"}.`,
+      });
+    } else if (section === "skills" && data.skills) {
+      // Set the skills array in the form
+      form.setValue("skills", data.skills);
+      toast.success("Skills generated", {
+        description: `${data.skills.length} AI-suggested skills for ${jobTitle || "this role"}.`,
+      });
+    } else {
+      toast.error("Unexpected response format", {
+        description: "AI response did not contain expected data.",
+      });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    toast.error("Generation failed", {
+      description: "Error generating AI content. Please try again.",
+    });
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
+  
+
 
   // Handle form submission
   const onSubmit = (data: z.infer<typeof resumeFormSchema>) => {
@@ -477,14 +344,14 @@ export default function ResumeBuilder() {
 
   // Remove item from array fields
   const removeItem = (field: keyof z.infer<typeof resumeFormSchema>, index: number) => {
-      const currentItems = form.getValues()[field] as any[];
-      if (currentItems.length <= 1) return;
-      
-      form.setValue(
-        field,
-        currentItems.filter((_, i) => i !== index)
-      );
-    };
+    const currentItems = form.getValues()[field] as any[];
+    if (currentItems.length <= 1) return;
+
+    form.setValue(
+      field,
+      currentItems.filter((_, i) => i !== index)
+    );
+  };
 
   // Form sections UI
   const renderPersonalInfo = () => (
@@ -583,7 +450,7 @@ export default function ResumeBuilder() {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => generateAiContent("summary", { jobTitle: form.getValues().workExperience[0]?.title })}
+          onClick={() => generateAiContent("summary")}
           disabled={isGenerating}
           className="flex items-center gap-1"
         >
@@ -630,7 +497,7 @@ export default function ResumeBuilder() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => generateAiContent("skills", { role: form.getValues().workExperience[0]?.title })}
+            onClick={() => generateAiContent("skills")}
             disabled={isGenerating}
           >
             {isGenerating ? "Generating..." : "Suggest Skills"}
@@ -638,7 +505,7 @@ export default function ResumeBuilder() {
           </Button>
         </div>
       </div>
-      
+
       <div className="space-y-2">
         {form.getValues().skills.map((_, index) => (
           <div key={index} className="flex items-center gap-2">
@@ -682,7 +549,7 @@ export default function ResumeBuilder() {
           <Plus className="h-4 w-4 mr-1" /> Add Position
         </Button>
       </div>
-      
+
       {form.getValues().workExperience.map((_, index) => (
         <Card key={index} className="p-4 relative">
           <Button
@@ -694,7 +561,7 @@ export default function ResumeBuilder() {
           >
             <Trash className="h-4 w-4" />
           </Button>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <FormField
               control={form.control}
@@ -723,7 +590,7 @@ export default function ResumeBuilder() {
               )}
             />
           </div>
-          
+
           <FormField
             control={form.control}
             name={`workExperience.${index}.location`}
@@ -737,7 +604,7 @@ export default function ResumeBuilder() {
               </FormItem>
             )}
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <FormField
               control={form.control}
@@ -759,10 +626,10 @@ export default function ResumeBuilder() {
                 <FormItem>
                   <FormLabel>End Date</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="month" 
-                      disabled={form.getValues().workExperience[index]?.current} 
-                      {...field} 
+                    <Input
+                      type="month"
+                      disabled={form.getValues().workExperience[index]?.current}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -770,7 +637,7 @@ export default function ResumeBuilder() {
               )}
             />
           </div>
-          
+
           <FormField
             control={form.control}
             name={`workExperience.${index}.current`}
@@ -789,21 +656,21 @@ export default function ResumeBuilder() {
               </FormItem>
             )}
           />
-          
+
           <div className="flex items-center justify-between mb-2">
             <FormLabel>Job Description</FormLabel>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => generateAiContent("workExperience", { index })}
+              onClick={() => generateAiContent("workExperience")}
               disabled={isGenerating}
             >
               {isGenerating ? "Generating..." : "Generate with AI"}
               <Wand2 className="h-4 w-4 ml-1" />
             </Button>
           </div>
-          
+
           <FormField
             control={form.control}
             name={`workExperience.${index}.description`}
@@ -841,7 +708,7 @@ export default function ResumeBuilder() {
           <Plus className="h-4 w-4 mr-1" /> Add Education
         </Button>
       </div>
-      
+
       {form.getValues().education.map((_, index) => (
         <Card key={index} className="p-4 relative">
           <Button
@@ -853,7 +720,7 @@ export default function ResumeBuilder() {
           >
             <Trash className="h-4 w-4" />
           </Button>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <FormField
               control={form.control}
@@ -882,7 +749,7 @@ export default function ResumeBuilder() {
               )}
             />
           </div>
-          
+
           <FormField
             control={form.control}
             name={`education.${index}.location`}
@@ -896,7 +763,7 @@ export default function ResumeBuilder() {
               </FormItem>
             )}
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <FormField
               control={form.control}
@@ -925,7 +792,7 @@ export default function ResumeBuilder() {
               )}
             />
           </div>
-          
+
           <FormField
             control={form.control}
             name={`education.${index}.description`}
@@ -961,7 +828,7 @@ export default function ResumeBuilder() {
           <Plus className="h-4 w-4 mr-1" /> Add Project
         </Button>
       </div>
-      
+
       {form.getValues().projects.map((_, index) => (
         <Card key={index} className="p-4 relative">
           <Button
@@ -973,7 +840,7 @@ export default function ResumeBuilder() {
           >
             <Trash className="h-4 w-4" />
           </Button>
-          
+
           <FormField
             control={form.control}
             name={`projects.${index}.name`}
@@ -987,7 +854,7 @@ export default function ResumeBuilder() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name={`projects.${index}.link`}
@@ -1001,7 +868,7 @@ export default function ResumeBuilder() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name={`projects.${index}.description`}
@@ -1037,7 +904,7 @@ export default function ResumeBuilder() {
           <Plus className="h-4 w-4 mr-1" /> Add Certification
         </Button>
       </div>
-      
+
       {form.getValues().certifications.map((_, index) => (
         <Card key={index} className="p-4 relative">
           <Button
@@ -1049,7 +916,7 @@ export default function ResumeBuilder() {
           >
             <Trash className="h-4 w-4" />
           </Button>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <FormField
               control={form.control}
@@ -1078,7 +945,7 @@ export default function ResumeBuilder() {
               )}
             />
           </div>
-          
+
           <FormField
             control={form.control}
             name={`certifications.${index}.date`}
@@ -1092,7 +959,7 @@ export default function ResumeBuilder() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name={`certifications.${index}.description`}
@@ -1128,16 +995,7 @@ export default function ResumeBuilder() {
           </div>
           <div className="flex gap-2">
             <Button
-              variant="outline"
-              onClick={autoFillResume}
-              disabled={isGenerating}
-              className="flex items-center gap-1"
-            >
-              {isGenerating ? "Generating..." : "Auto-Fill with AI"}
-              <Wand2 className="h-4 w-4 ml-1" />
-            </Button>
-            <Button 
-              type="submit" 
+              type="submit"
               onClick={form.handleSubmit(onSubmit)}
               className="flex items-center gap-1"
             >
@@ -1159,27 +1017,27 @@ export default function ResumeBuilder() {
                     <TabsTrigger value="education">Education</TabsTrigger>
                     <TabsTrigger value="extras">Extras</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="personal" className="space-y-8">
                     {renderPersonalInfo()}
                   </TabsContent>
-                  
+
                   <TabsContent value="summary" className="space-y-8">
                     {renderSummary()}
                   </TabsContent>
-                  
+
                   <TabsContent value="skills" className="space-y-8">
                     {renderSkills()}
                   </TabsContent>
-                  
+
                   <TabsContent value="experience" className="space-y-8">
                     {renderWorkExperience()}
                   </TabsContent>
-                  
+
                   <TabsContent value="education" className="space-y-8">
                     {renderEducation()}
                   </TabsContent>
-                  
+
                   <TabsContent value="extras" className="space-y-8">
                     <div className="space-y-8">
                       {renderProjects()}
@@ -1191,7 +1049,7 @@ export default function ResumeBuilder() {
               </form>
             </Form>
           </div>
-          
+
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
@@ -1234,3 +1092,45 @@ export default function ResumeBuilder() {
     </AuthCheck>
   );
 }
+
+
+  // Auto-fill entire resume with AI
+  // const autoFillResume = async () => {
+  //   setIsGenerating(true);
+
+  //   try {
+  //     const send = JSON.stringify({
+  //       job_title: form.getValues().workExperience[0]?.title,
+  //       skills: form.getValues().skills,
+  //     });
+  //     console.log(send);
+      
+  //     // Simulate AI generation delay
+  //     const response = await fetch("http://127.0.0.1:8000/generate-resume", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body:send,
+  //     })
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch AI-generated resume");
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("AI-generated resume:", data);
+  //     form.reset(data.resume);
+
+  //     toast("Resume auto-filled", {
+  //       description: "AI has generated a complete resume draft. You can edit and customize it as needed.",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error auto-filling resume:", error);
+  //     toast.error("Auto-fill failed", {
+  //       description: "There was an error generating your resume.",
+  //     });
+  //   } finally {
+  //     setIsGenerating(false);
+  //   }
+  // };
