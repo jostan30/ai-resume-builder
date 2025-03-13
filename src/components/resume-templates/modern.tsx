@@ -1,5 +1,4 @@
 "use client";
-import React, { useEffect } from 'react';
 import { FiMail, FiPhone, FiMapPin, FiLinkedin, FiGlobe } from 'react-icons/fi';
 
 export interface PersonalInfo {
