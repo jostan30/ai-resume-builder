@@ -53,45 +53,9 @@ export interface ResumeTemplateProps {
   data: ResumeData;
 }
 
-declare global {
-  interface Window {
-    html2pdf: any;
-  }
-}
 
 const ModernResumeTemplate: React.FC<ResumeTemplateProps> = ({ data }) => {
-  useEffect(() => {
-    // Load html2pdf library if not already loaded
-    if (typeof window !== 'undefined' && !window.html2pdf) {
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
 
-  const downloadAsPDF = () => {
-    const resumeElement = document.getElementById('modern-resume');
-    if (window && window.html2pdf && resumeElement) {
-      const opt = {
-        margin: [0.5, 0.5, 0.5, 0.5],
-        filename: `${data.personalInfo.name?.replace(/\s+/g, '_') || 'Resume'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      
-      // Apply print-specific styling
-      document.body.classList.add('printing');
-      
-      window.html2pdf().set(opt).from(resumeElement).save().then(() => {
-        // Remove print-specific styling after PDF is generated
-        document.body.classList.remove('printing');
-      });
-    } else {
-      alert('PDF generation library is loading. Please try again in a moment.');
-    }
-  };
 
   return (
     <div className="font-sans w-full max-w-4xl mx-auto my-4 bg-white rounded-lg overflow-hidden print:shadow-none">
@@ -253,16 +217,6 @@ const ModernResumeTemplate: React.FC<ResumeTemplateProps> = ({ data }) => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Download Button - improved styling and positioning */}
-      <div className="mt-6 mb-8 text-center">
-        <button 
-          onClick={downloadAsPDF}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Download PDF
-        </button>
       </div>
 
       {/* Add global styles for printing */}

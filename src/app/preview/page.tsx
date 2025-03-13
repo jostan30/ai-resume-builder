@@ -14,7 +14,7 @@ import {
 import AuthCheck from "@/providers/authprovider";
 import { useSupabase } from "@/lib/useSupabase";
 import { toast } from "sonner";
-import { Download, Share2, ArrowLeft, Copy, Edit, Check } from "lucide-react";
+import { Download, ArrowLeft, Edit, Check } from "lucide-react";
 import { motion } from "framer-motion";
 
 // Resume template components

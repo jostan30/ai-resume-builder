@@ -52,24 +52,7 @@ export interface ResumeTemplateProps {
 }
 
 const MinimalResumeTemplate: React.FC<ResumeTemplateProps> = ({ data }) => {
-  const downloadAsPDF = () => {
-    // This function would be implemented with html2pdf.js
-    // For simplicity, we're just showing a button that would trigger the download
-    const resumeElement = document.getElementById('minimal-resume');
-    if (window && window.html2pdf && resumeElement) {
-      const opt = {
-        margin: [0.5, 0.5, 0.5, 0.5],
-        filename: `${data.personalInfo.name?.replace(' ', '_')}_Resume.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      window.html2pdf().set(opt).from(resumeElement).save();
-    } else {
-      alert('PDF generation library not loaded');
-    }
-  };
-
+  
   return (
     <div className="font-sans max-w-3xl mx-auto my-8 bg-white shadow-sm overflow-hidden relative">
       <div id="minimal-resume" className="p-6 bg-white">
@@ -198,15 +181,6 @@ const MinimalResumeTemplate: React.FC<ResumeTemplateProps> = ({ data }) => {
         )}
       </div>
 
-      {/* Download Button - outside the PDF content */}
-      <div className="mt-6 text-center">
-        <button 
-          onClick={downloadAsPDF}
-          className="bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-sm text-sm"
-        >
-          Download PDF
-        </button>
-      </div>
     </div>
   );
 };
