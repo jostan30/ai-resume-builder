@@ -11,7 +11,7 @@ export default function AuthCheck({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/login");
+      router.push("/signup");
     }
   }, [user, isLoading, router]);
 

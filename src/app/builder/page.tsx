@@ -124,7 +124,7 @@ export default function ResumeBuilder() {
   // Watch form values for auto-save and AI feedback
   const watchedValues = form.watch();
 
-  // Fetch saved resume data
+  // // // Fetch saved resume data
   useEffect(() => {
     async function fetchResumeData() {
       if (!user) return;
@@ -153,35 +153,43 @@ export default function ResumeBuilder() {
     }
 
     fetchResumeData();
-  }, [user, supabase, form]);
+  }, [user]);
 
   // Auto-save to Supabase
-  useEffect(() => {
-
-    if (!user) return;
-    const debounce = setTimeout(async () => {
-      try {
-        setIsSaving(true);
-        const { error } = await supabase
-          .from('resumes')
-          .upsert({
-            user_id: user.id,
-            content: watchedValues,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' });
-
-        if (error) {
-          console.error("Error saving resume:", error)
-        }
-      } catch (error) {
-        console.error("Error saving resume:", error);
-      } finally {
-        setIsSaving(false);
+  const saveResume = async () => {
+    if (!user || !user.id) {
+      console.error("User ID is missing:", user);
+      return;
+    }
+    console.log("watchedValues:", watchedValues);
+  
+    try {
+      setIsSaving(true);
+      const { error } = await supabase
+        .from("resumes")
+        .upsert(
+          [
+            {
+              user_id: user.id,
+              content: watchedValues, // Remove JSON.stringify()
+              updated_at: new Date().toISOString(),
+            },
+          ],
+          { onConflict: "user_id" } // Ensure 'user_id' is UNIQUE in Supabase
+        );
+  
+      if (error) {
+        console.error("Error saving resume:", error.message || error);
+      } else {
+        console.log("Resume saved successfully.");
       }
-    }, 1500);
-
-    return () => clearTimeout(debounce);
-  }, [user, supabase, watchedValues]);
+    } catch (error) {
+      console.error("Unexpected error saving resume:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
 
   // // Generate AI feedback
   useEffect(() => {
@@ -280,7 +288,8 @@ const generateAiContent = async (section: string) => {
 
 
   // Handle form submission
-  const onSubmit = (data: z.infer<typeof resumeFormSchema>) => {
+  const onSubmit = async (data: z.infer<typeof resumeFormSchema>) => {
+    await saveResume();
     router.push("/preview");
   };
 
