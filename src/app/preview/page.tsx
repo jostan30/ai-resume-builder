@@ -69,7 +69,7 @@ export default function ResumePreview() {
     }
     
     fetchResumeData();
-  }, [user, supabase, toast]);
+  }, [user, supabase]);
 
   // Generate AI summary of the resume
   const generateAiSummary = async (data:any) => {
