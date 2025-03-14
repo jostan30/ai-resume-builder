@@ -285,8 +285,6 @@ const generateAiContent = async (section: string) => {
 };
 
   
-
-
   // Handle form submission
   const onSubmit = async (data: z.infer<typeof resumeFormSchema>) => {
     await saveResume();

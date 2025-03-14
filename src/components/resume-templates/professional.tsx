@@ -59,8 +59,7 @@ const ProfessionalResumeTemplate: React.FC<ResumeTemplateProps> = ({ data }) => 
         {/* Header Section */}
         <div className="border-b-2 border-gray-800 pb-4 mb-6">
           <h1 className="text-3xl font-bold text-gray-900">{data.personalInfo.name || 'Your Name'}</h1>
-          <h2 className="text-xl text-gray-700 mt-1">{data.personalInfo.title || 'Professional Title'}</h2>
-          
+        
           {/* Contact Info */}
           <div className="flex flex-wrap mt-4 text-sm text-gray-700">
             {data.personalInfo.email && (
