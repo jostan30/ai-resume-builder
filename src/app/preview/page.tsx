@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,17 +21,16 @@ import { motion } from "framer-motion";
 import ModernTemplate from "@/components/resume-templates/modern";
 import MinimalTemplate from "@/components/resume-templates/minimal";
 import ProfessionalTemplate from "@/components/resume-templates/professional";
-import domtoimage from "dom-to-image-more";
-import { saveAs } from "file-saver";
+
 
 export default function ResumePreview() {
   const router = useRouter();
   const { supabase, user } = useSupabase();
-  const [resumeData, setResumeData] = useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState("modern");
-  const [isLoading, setIsLoading] = useState(true);
-  const [aiSummary, setAiSummary] = useState("");
-
+  const [resumeData, setResumeData] = useState<any>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("modern");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [aiSummary, setAiSummary] = useState<string>("");
+  const resumeRef = useRef<HTMLDivElement>(null);
 
   // Fetch resume data from Supabase
   useEffect(() => {
@@ -71,7 +69,7 @@ export default function ResumePreview() {
   }, [user, supabase]);
 
   // Generate AI summary of the resume
-  const generateAiSummary = async (data:any) => {
+  const generateAiSummary = async (data: any) => {
     // Simulate AI processing
     setTimeout(() => {
       if (!data) return;
@@ -89,25 +87,79 @@ export default function ResumePreview() {
   };
 
   const exportToPdf = async () => {
-    const resumeElement = document.getElementById("resume-preview");
-    if (!resumeElement) {
-      toast("Error", { description: "Could not find resume to export." });
+    if (!resumeRef.current) {
+      toast.error("Error", { description: "Could not find resume to export." });
       return;
     }
   
     try {
-      toast("Exporting Image", { description: "Your resume is being prepared for download." });
+      toast("Preparing PDF", { description: "Starting export process..." });
   
-      const blob = await domtoimage.toBlob(resumeElement);
-      saveAs(blob, "resume.png");
-  
-      toast("Export Successful", { description: "Your resume has been saved as an image." });
+      // Import the necessary libraries
+      const htmlToImage = await import('html-to-image');
+      const jsPDF = (await import("jspdf")).default;
+      
+      // Get the element
+      const resumeElement = resumeRef.current;
+      
+      // Create a PNG image of the resume
+      const dataUrl = await htmlToImage.toPng(resumeElement, {
+        quality: 1.0,
+        pixelRatio: 2,
+        // This is important: capture the computed styles without OKLCH colors
+        filter: (node) => {
+          if (node instanceof HTMLElement) {
+            const style = window.getComputedStyle(node);
+            const bgColor = style.backgroundColor;
+            const color = style.color;
+            
+            if (bgColor.includes('oklch') || color.includes('oklch')) {
+              node.style.cssText += ';color: rgb(0,0,0) !important; background-color: transparent !important;';
+            }
+          }
+          return true;
+        }
+      });
+      
+      // Create a PDF with the image
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Calculate dimensions
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      // Handle multi-page content
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let position = 0;
+      
+      // First page
+      pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
+      
+      // Add additional pages if needed
+      let heightLeft = pdfHeight - pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      pdf.save('resume.pdf');
+      
+      toast("Export Successful", { description: "Your resume has been downloaded as a PDF." });
     } catch (error) {
-      console.error("Error exporting image:", error);
-      toast("Error", { description: "An error occurred while exporting the resume." });
+      console.error("Error exporting PDF:", error);
+      toast.error("Error", { 
+        description: `PDF export failed: ${error instanceof Error ? error.message : "Unknown error"}` 
+      });
     }
   };
-
   // Determine which template to render
   const renderSelectedTemplate = () => {
     if (!resumeData) return null;
@@ -167,7 +219,7 @@ export default function ResumePreview() {
                 onClick={exportToPdf}
                 className="flex items-center gap-1"
               >
-                <Download className="h-4 w-4 mr-1" /> Export PDF
+                <Download className="h-4 w-4 mr-1" /> Download PDF
               </Button>
             </div>
           </div>
@@ -193,7 +245,7 @@ export default function ResumePreview() {
                 transition={{ duration: 0.5 }}
                 className="bg-white rounded-lg shadow-lg overflow-hidden"
               >
-                <div className="resume-preview-container" id="resume-preview">
+                <div className="resume-preview-container" ref={resumeRef}>
                   {renderSelectedTemplate()}
                 </div>
               </motion.div>
