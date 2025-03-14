@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI-Powered Resume Builder 🚀  
 
-## Getting Started
+## 📌 Overview  
 
-First, run the development server:
+The **AI-Powered Resume Builder** is a web application that leverages artificial intelligence to help users generate, enhance, and format resumes effortlessly. It integrates AI-driven text generation, smart content recommendations, and automated resume formatting to simplify the resume-building process.  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🛠️ Tech Stack  
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### **Frontend**  
+- **Next.js** (React Framework)  
+- **Tailwind CSS** (UI Styling)  
+- **html-to-image** (PDF Export)  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### **Backend**  
+- **FastAPI** (AI API & Backend Services)  
+- **Supabase** (Authentication & Database)  
+- **Render** (Backend Deployment)  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### **AI Integration**  
+- **Hugging Face API** (Open-source AI Model)  
+- **distilgpt2** (Text Generation & Resume Optimization)  
 
-## Learn More
+### **Deployment**  
+- **Vercel** (Frontend Hosting)  
+- **Supabase Storage** (Resume File Storage)  
 
-To learn more about Next.js, take a look at the following resources:
+## ✨ AI-Powered Features  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+✅ **Auto-Generate Resume Content** – AI generates job descriptions, summaries, and skills from minimal user input.  
+✅ **Smart Resume Recommendations** – AI suggests missing sections or improvements.  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Installation & Setup  
 
-## Deploy on Vercel
+1. **Clone the repository**  
+   ```bash
+   git clone https://github.com/yourusername/ai-resume-webapp.git
+   cd ai-resume-webapp
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Install dependencies**  
+   ```bash
+   npm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Start the development server**  
+   ```bash
+   npm run dev
+   ```
+
+4. **Run the backend (FastAPI)**  
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+5. **Environment Variables**  
+   Set up `.env` file for API keys (OpenAI, Hugging Face, Supabase, etc.).  
+
+## 📌 Next Steps  
+
+- Choose an **AI model** (`GPT-3.5-turbo` or `BLOOM`, I have used `distilgpt2`).  
+- Set up the **AI API using FastAPI**.   
+
+Backend isnt deployed so ai-features wont work ,
+Check out backend code 
+`https://github.com/jostan30/ai-resume-builder-backend`
+
