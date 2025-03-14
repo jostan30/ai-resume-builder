@@ -1,3 +1,11 @@
+
+
+
+
+https://github.com/user-attachments/assets/a82ddad9-67dd-43fb-a2de-3e5f5641d08e
+
+
+_______________________________________________________________________________________________________________________________
 # AI-Powered Resume Builder 🚀  
 
 ## 📌 Overview  
@@ -33,8 +41,8 @@ The **AI-Powered Resume Builder** is a web application that leverages artificial
 
 1. **Clone the repository**  
    ```bash
-   git clone https://github.com/yourusername/ai-resume-webapp.git
-   cd ai-resume-webapp
+   https://github.com/jostan30/ai-resume-builder.git
+   cd ai-resume-builder
    ```
 
 2. **Install dependencies**  
@@ -53,7 +61,13 @@ The **AI-Powered Resume Builder** is a web application that leverages artificial
    ```
 
 5. **Environment Variables**  
-   Set up `.env` file for API keys (OpenAI, Hugging Face, Supabase, etc.).  
+   Set up `.env` file for API keys (OpenAI, Hugging Face, Supabase, etc.).
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=****
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=****
+   ```
+
+
 
 ## 📌 Next Steps  
 
